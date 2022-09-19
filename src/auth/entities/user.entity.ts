@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Uhs } from "./other.entity";
+import { Employee } from "./employee.entity";
 
 @Entity('users')
 export class User {
@@ -7,24 +7,39 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
+    @Column('text')
+    fullName: string;
+
     @Column('text', {
         unique: true
     })
     email: string;
 
-    @Column('text')
+    @Column('bool', {
+        default: false
+    })
+    termsAndConditions: true;
+
+    @Column('bool', {
+        default: true
+    })
+    isActive: boolean;
+
+    @Column('text', {
+        array: true,
+        default: ['user']
+    })
+    roles: string[];
+
+    @Column('text', {
+        select: false
+    })
     password: string;
 
     @OneToMany(
-        () => Uhs,
-        ( user ) => user.holder
+        () => Employee,
+        ( user ) => user.holder,
     )
-    holder: Uhs;
-
-    @OneToMany(
-        () => Uhs,
-        ( user ) => user.sub
-    )
-    sub: Uhs;
+    users: Employee;
     
 }

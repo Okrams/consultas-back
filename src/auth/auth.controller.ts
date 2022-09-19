@@ -1,56 +1,42 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Auth, GetUser } from './decorators';
+import { CreateUserDto, CreateUserWithOuthRole, LoginUserDto } from './dto';
+import { User } from './entities';
+import { ValidRoles } from './interfaces';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
 
-  @Post('create-holder')
-  async createHolder(@Body() user: any){
-    return await this.authService.createHolder(user);
+  @Auth( ValidRoles.admin )
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto){
+    return createUserDto;
   }
 
-  @Post('create-user')
-  async createUser(@Body() user: any){
-    return await this.authService.createUser();
-  }
-
-  @Get('my-user')
-  async getMyUsers(){
-    return await this.authService.myUsers();
-  }
-
-  @Get('my-holder')
-  async getMyHL(){
-    return await this.authService.MyHolder();
+  @Auth( ValidRoles.holder )
+  @Post('register-user')
+  async registerUser(
+    @Body() createUserDto: CreateUserWithOuthRole,
+    @GetUser() user: User
+  ){
+    return this.authService.createUser(createUserDto, user);
   }
 
 
   @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  async login(@Body() loginUserDto: LoginUserDto){
+    return await this.authService.login(loginUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Auth()
+  @Get('check-auth')
+  checkAuthStatus(
+    @GetUser() user: User 
+  ){
+    return this.authService.checkAuthStatus(user);
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
+  
 }
