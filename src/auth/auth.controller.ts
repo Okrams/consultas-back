@@ -1,30 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
+import { User } from '../user/entities';
 import { AuthService } from './auth.service';
 import { Auth, GetUser } from './decorators';
-import { CreateUserDto, CreateUserWithOuthRole, LoginUserDto } from './dto';
-import { User } from './entities';
-import { ValidRoles } from './interfaces';
+import { LoginUserDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
+
   constructor(private readonly authService: AuthService) {}
-
-
-  @Auth( ValidRoles.admin )
-  @Post('register')
-  async register(@Body() createUserDto: CreateUserDto){
-    return createUserDto;
-  }
-
-  @Auth( ValidRoles.holder )
-  @Post('register-user')
-  async registerUser(
-    @Body() createUserDto: CreateUserWithOuthRole,
-    @GetUser() user: User
-  ){
-    return this.authService.createUser(createUserDto, user);
-  }
-
 
   @Post()
   async login(@Body() loginUserDto: LoginUserDto){
@@ -34,7 +17,7 @@ export class AuthController {
   @Auth()
   @Get('check-auth')
   checkAuthStatus(
-    @GetUser() user: User 
+    @GetUser() user: User
   ){
     return this.authService.checkAuthStatus(user);
   }

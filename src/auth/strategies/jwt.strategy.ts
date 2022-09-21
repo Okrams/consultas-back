@@ -1,18 +1,16 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
-import { InjectRepository } from "@nestjs/typeorm";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { Repository } from "typeorm";
-import { User } from "../entities/user.entity";
+import { User } from "../../user/entities";
+import { UserService } from "src/user/user.service";
 import { JwtPayload } from "../interfaces/jwt-payload.interface";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
 
     constructor(
-        @InjectRepository( User )
-        private readonly userRepository: Repository<User>,
+        private readonly userService: UserService,
         configService: ConfigService
     ) {
         super({
@@ -23,15 +21,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     async validate(payload: JwtPayload): Promise<User> {
         const { id } = payload;
-
-        
-        const user = await this.userRepository.findOneBy({id});
-        
+        if(!id){
+            throw new UnauthorizedException('Token no valido');
+        }
+        const user = await this.userService.findUser({
+            where: {id}
+        });
 
         if(!user) throw new UnauthorizedException('Token no valido');
 
         if(!user.isActive) throw new UnauthorizedException('Usuario inactivo, hable con un administrador');
-        
+        delete user.password;
         return user;
     }
 

@@ -9,14 +9,16 @@ export class Employee {
 
     @ManyToOne(
         () => User,
-        ( user ) => user.users,
+        ( user ) => user.workers
     )
     holder: User;
 
+
     @OneToOne(
         () => User,
+        ( user ) => user.user
     )
     @JoinColumn()
-    employee: User;
+    user: User;
 
 }

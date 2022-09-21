@@ -1,0 +1,1 @@
+export { UserAccounts } from "./user-accounts.entity";
