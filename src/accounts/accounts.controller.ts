@@ -3,11 +3,11 @@ import { Auth, GetUser } from 'src/auth/decorators';
 import { User } from '../user/entities';
 import { ValidRoles } from 'src/auth/interfaces';
 import { AccountsService } from './accounts.service';
-import { CreateAccountDto } from './dto/create-account.dto';
-import { UpdateAccountDto } from './dto/update-account.dto';
+import { AddAccountDto, CreateGroupDto } from './dto';
 
 @Controller('accounts')
 export class AccountsController {
+
   constructor(private readonly accountsService: AccountsService) {}
 
 
@@ -16,11 +16,27 @@ export class AccountsController {
   getMyAccounts(
     @GetUser() user: User
   ){
-    if(user.roles.includes('admin')){
-      return 'All accounts of PEMSA'
-    }else{
-      return `All accounts for user ${user.fullName}`;
-    }
+    return this.accountsService.getMyAccounts(user);
+  }
+
+  @Auth(ValidRoles.holder)
+  @Post('create-group')
+  createCustomGroup(
+    @GetUser() user: User,
+    @Body() createGroupDto: CreateGroupDto
+  ){
+    return this.accountsService.createCustomGroup(user, createGroupDto);
+  }
+
+  // TODO: Verificar
+  @Auth( ValidRoles.admin, ValidRoles.holder )
+  @Post('update/:id')
+  async addAccounts(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser() user: User,
+    @Body() addAccountDto: AddAccountDto
+  ){
+    return await this.accountsService.updateAccounts(id, user, addAccountDto.accounts );
   }
 
   @Auth()
@@ -34,17 +50,6 @@ export class AccountsController {
       return `All groups for user ${user.fullName}`;
     }
   }
-
-  @Auth( ValidRoles.admin, ValidRoles.holder )
-  @Post('add-accounts/:id')
-  addAccounts(
-    @Param('id', ParseUUIDPipe) id: string,
-    @GetUser() user: User
-  ){
-    return this.accountsService.addAccounts(id, user);
-  }
-
-  
 
   
 }

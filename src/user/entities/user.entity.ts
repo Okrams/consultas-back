@@ -1,4 +1,4 @@
-import { UserAccounts } from "../../accounts/entities";
+import { UserAccounts, CustomGroup } from "../../accounts/entities";
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Employee } from "./employee.entity";
 
@@ -44,8 +44,6 @@ export class User {
     user: Employee;
 
 
-
-
     @OneToMany(
         () => Employee,
         ( user ) => user.holder,
@@ -55,8 +53,16 @@ export class User {
 
     @OneToMany(
         () => UserAccounts,
-        ( userAccount ) => userAccount.user 
+        ( userAccount ) => userAccount.user,
+        {cascade : true}
     )
     accounts?: UserAccounts[];
+
+    @OneToMany(
+        () => CustomGroup,
+        ( customGroup ) => customGroup.user,
+        {cascade : true}
+    )
+    groups?: CustomGroup[];
     
 }
